@@ -81,7 +81,7 @@ export default function App() {
           fallback={<p style={{ color: "var(--mist-2)" }}>Carregando…</p>}
         >
           {active === "dashboard" && <Dashboard data={data} />}
-          {active === "body" && <Body />}
+          {active === "body" && <Body weekly={data.weekly} />}
           {active === "settings" && (
             <Settings connected={data.connected} demo={data.demo} onReload={reload} />
           )}

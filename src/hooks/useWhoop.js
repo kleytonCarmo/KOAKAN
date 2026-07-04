@@ -8,6 +8,7 @@ const DEMO = {
   recovery: { score: 72, hrv: 68, rhr: 52 },
   sleep: { performance: 84, hours: 7.4 },
   strain: { value: 12.6, avgHr: 128 },
+  weekly: { totalKcal: 18240, exerciseKcal: 3120 },
   trend: [
     { date: "01/06", recovery: 61 },
     { date: "02/06", recovery: 55 },

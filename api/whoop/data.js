@@ -23,6 +23,13 @@ export default async function handler(req, res) {
     const sleep = await call(WHOOP.paths.sleep, { limit: "1" });
     const cycle = await call(WHOOP.paths.cycle, { limit: "1" });
 
+    // Gasto calórico dos últimos 7 dias:
+    // - ciclos = energia total do dia (metabolismo + atividade)
+    // - treinos = energia gasta em exercício
+    const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
+    const cyclesWeek = await call(WHOOP.paths.cycle, { start: weekAgo, limit: "10" });
+    const workoutsWeek = await call(WHOOP.paths.workout, { start: weekAgo, limit: "25" });
+
     // Se a sessão renovou durante as chamadas, grava o cookie atualizado.
     if (live !== session) writeSession(res, live);
 
@@ -54,12 +61,24 @@ export default async function handler(req, res) {
         value: latestCycle.strain ?? null,
         avgHr: latestCycle.average_heart_rate ?? null,
       },
+      weekly: {
+        totalKcal: sumKcal(cyclesWeek.data?.records),
+        exerciseKcal: sumKcal(workoutsWeek.data?.records),
+      },
       trend,
     });
   } catch (e) {
     console.error(e);
     res.status(502).json({ connected: true, error: "Falha ao ler dados do Whoop." });
   }
+}
+
+// Soma a energia (kilojoules) de uma coleção e converte para kcal.
+function sumKcal(records) {
+  if (!records || !records.length) return null;
+  const kj = records.reduce((acc, r) => acc + (r.score?.kilojoule || 0), 0);
+  if (!kj) return null;
+  return Math.round(kj / 4.184);
 }
 
 function hoursFromSleep(sleep) {
